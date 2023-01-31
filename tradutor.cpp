@@ -8,7 +8,8 @@
 
 using namespace std;
 
-void ifequ(string fname);
+void translate(vector<string> pre_processed);
+vector<string> ifequ(string fname);
 string ifequprocessing(string line);
 vector<string> splitString(string input);
 string removeComments(string input);
@@ -24,16 +25,29 @@ int main(int argc, char **argv)
     }
     else
     {
-        cout << "Processamento de EQU e IF. Extensão de saída PRE" << endl;
-        cout << endl;
-
-        ifequ(argv[1]);
-
-        cout << endl;
-        cout << endl;
+        translate(ifequ(argv[1]));  // Função translate recebe o array de strings retornado pela função ifequ
     }
     return 0;
 }
+
+/*
+    Tradução para Assembly IA-32
+*/
+void translate(vector<string> pre_processed)
+{
+    cout << endl;
+    cout << "Início da tradução" << endl;
+    cout << endl;
+    for(int i = 0; i < pre_processed.size(); i++)
+    {
+        cout << pre_processed[i] << endl;
+    }
+}
+
+
+/*
+    Pré-processamento de IF e EQU
+*/
 
 // IF e EQU
 string ifequprocessing(string line)  // Recebe a linha sem comentários, realiza o pré processamento e escreve no arquivo de saída
@@ -100,16 +114,15 @@ string ifequprocessing(string line)  // Recebe a linha sem comentários, realiza
 
 }
 
-void ifequ(string fname)
+vector<string> ifequ(string fname)
 {
-    cout << "Pré-processamento para IF e EQU" << endl;
     string fname_asm = static_cast<string>(fname) + ".asm";
 
     ifstream file(fname_asm);  // Arquivo .asm de entrada
     string line_raw, file_line;
 
-    ofstream outfile(static_cast<string>(fname) + ".pre");  // Arquivo .pre de saída com os comentários removidos e pré-processamento de IF e EQU
-
+    // ofstream outfile(static_cast<string>(fname) + ".pre");  // Arquivo .pre de saída com os comentários removidos e pré-processamento de IF e EQU
+    vector<string> pre_processed;
     while (getline(file, line_raw))
     {
         // separa a linha em rótulo, operação, operandos, comentários
@@ -121,10 +134,12 @@ void ifequ(string fname)
             if(file_line != "")
             {
                 //write to file
-                outfile << file_line << endl;
+                pre_processed.push_back(file_line);
             }
         }
     }
+    cout << "Pré-processamento para IF e EQU realizado" << endl;
+    return pre_processed;
 }
 
 // Funções auxiliares
