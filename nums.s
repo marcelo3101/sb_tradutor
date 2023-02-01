@@ -37,7 +37,7 @@ atoi:
     sub ecx, 0x30 ; Realiza a conversão
     mul ebx ; Multiplica por 10, na primeira iteração eax é zero, então não irá alterar o valor
     add eax, ecx ; Adição do valor convertido, após multiplicar por 10
-    jmp .top ; jmp do loop
+    jmp .loop ; jmp do loop
 .done:
     add eax, 20
 
@@ -67,6 +67,4 @@ int_to_string:
     mov ebx, 0
     int 80h
 
-    ; nasm -f elf -o input.o input.s && ld -m elf_i386 -o input input.o
-
-    
+    ; nasm -f elf -o nums.o nums.s && ld -m elf_i386 -o nums nums.o
