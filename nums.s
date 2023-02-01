@@ -4,7 +4,7 @@ MSG_SIZE EQU $-msg
 valor dd 0
 section .bss
 input_text resb 10 ; Será o parâmetro de INPUT
-buffer resb 10 ; String resultado da conversão de int para ascII
+buffer resb 10 ; String resultado da conversão de int para ASCII
 
 section .text
 global _start
@@ -41,7 +41,7 @@ atoi:
 .done:
     add eax, 20
 
-    ;Converter novamente para ascII
+    ;Converter novamente para ASCII
 int_to_string:
     mov esi, buffer     ; esi aponta para o primeiro byte de buffer
     add esi, 9          ; Vai para o último endereço do buffer
@@ -50,7 +50,7 @@ int_to_string:
 .next_digit:
     xor edx, edx        ; Limpa o valor de edx para realizar a divisão de edx:eax por ebx
     div ebx             ; eax /= 10, realiza a divisão inteira. O resto estará em edx
-    add dl, 0x30        ; Converte o resto da divisão para ascII
+    add dl, 0x30        ; Converte o resto da divisão para ASCII
     dec esi             ; Estamos salvando no buffer em ordem inversa
     mov [esi], dl       ; Salva o caractere já convertido no conteúdo do endereço apontado pelo esi
     test eax, eax       ; eax AND eax para testar se foi zerado    
