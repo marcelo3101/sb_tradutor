@@ -71,9 +71,7 @@ input:
 .done:
     cmp byte [ebp-4], 1
     jne no_mult
-    add eax, 1
     neg eax
-    sbb eax, 0
 no_mult:
     mov ebx, edi ; ebx contém o número de bytes lidos
     leave
@@ -92,9 +90,7 @@ output:
     mov byte [ebp-4], 0
     cmp eax, 0
     jge int_to_string
-    add eax, 1
     neg eax ; Transforma em positivo para a conversão
-    sbb eax, 0
     mov byte [ebp-4], 1 ; Set na flag para saber que é negativo
 
     ;Converter novamente para ASCII
