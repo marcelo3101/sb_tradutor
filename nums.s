@@ -16,7 +16,9 @@ _start:
     int 80h
     push input_text ; Empilha o endereço do primeiro byte, parâmetro para a função INPUT
     call input 
-    ;add eax, 10
+    ;push buffer
+    ;call output
+    add eax, 10
     push buffer ; Empilha o endereço do primeiro byte do buffer de saída
     call output
 
@@ -48,6 +50,7 @@ input:
     xor eax, eax ; eax inicializado como zero
     mov esi, [ebp+8] ; esi aponta para o endereço recebido como parâmetro
     mov ebx, 10 ; ebx igual a 10 para a multiplicação
+    
     cmp byte [esi], 0x2D ; Compara se o primeiro caractere é o sinal negativo
     jne .loop ; if(*esi != '-')
     ; Caso for negativo retirar o sinal e marcar a variável local para o número ser multiplicado por -1 ao final
@@ -69,7 +72,6 @@ input:
     cmp byte [ebp-4], 1
     jne no_mult
     neg eax
-    sbb eax, 0
 no_mult:
     mov ebx, edi ; ebx contém o número de bytes lidos
     leave
@@ -89,7 +91,7 @@ output:
     cmp eax, 0
     jge int_to_string
     neg eax ; Transforma em positivo para a conversão
-    sub eax, 1
+    sbb eax, 0
     mov byte [ebp-4], 1 ; Set na flag para saber que é negativo
 
     ;Converter novamente para ASCII
@@ -111,6 +113,9 @@ int_to_string:
     jne .done
     dec esi
     mov byte [esi], 0x2D
+    neg eax
+    sbb eax, 0
+    mov ebx, eax
 .done:
     mov eax, 4
     mov ebx, 1
