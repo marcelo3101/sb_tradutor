@@ -89,6 +89,7 @@ output:
     cmp eax, 0
     jge int_to_string
     neg eax ; Transforma em positivo para a conversão
+    sub eax, 1
     mov byte [ebp-4], 1 ; Set na flag para saber que é negativo
 
     ;Converter novamente para ASCII
