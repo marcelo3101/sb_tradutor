@@ -17,6 +17,8 @@ string removeComments(string input);
 bool jump_line = false;  // Operador booleano usado no pré-processamento de IF
 unordered_map<string, int> equ_table;
 
+
+
 int main(int argc, char **argv)
 { // argv[0] é sempre o nome do programa
     if (argc != 2)
@@ -38,6 +40,26 @@ void translate(vector<string> pre_processed)
     cout << endl;
     cout << "Início da tradução" << endl;
     cout << endl;
+    unordered_map<std::string, std::string> translations = {
+        {"ADD", "add eax, %arg1%"},
+        {"SUB", "sub eax, %arg1%"},
+        {"MUL", "mov ebx, %arg1%"},
+        {"DIV", "mov ebx, %arg1%"},
+        {"JMP", "jmp %arg1%"},
+        {"JMPN", "cmp eax, 0"},
+        {"JMPP", "cmp eax, 0"},
+        {"JMPZ", "cmp eax, 0"},
+        {"COPY", "mov %arg1%, %arg2%"},
+        {"LOAD", "mov eax, %arg1%"},
+        {"STORE", "mov %arg1%, eax"},
+        {"INPUT", "depois man"},
+        {"OUTPUT", "depois man"},
+        {"INPUT_C", "depois man"},
+        {"OUTPUT_C", "depois man"},
+        {"INPUT_S", "depois man"},
+        {"OUTPUT_S", "depois man"},
+        {"STOP", "syscall"}
+    };
     for(int i = 0; i < pre_processed.size(); i++)
     {
         cout << pre_processed[i] << endl;
