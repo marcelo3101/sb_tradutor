@@ -40,18 +40,20 @@ void translate(vector<string> pre_processed)
     cout << endl;
     cout << "Início da tradução" << endl;
     cout << endl;
-    unordered_map<std::string, std::string> translations = {
-        {"ADD", "add eax, %arg1%"},
-        {"SUB", "sub eax, %arg1%"},
-        {"MUL", "mov ebx, %arg1%"},
-        {"DIV", "mov ebx, %arg1%"},
-        {"JMP", "jmp %arg1%"},
+    vector<string> translated;
+    string translated_line = "";
+    unordered_map<string, string> translations = {
+        {"ADD", "add eax, $arg1$"},
+        {"SUB", "sub eax, $arg1$"},
+        {"MUL", "mov ebx, $arg1$"},
+        {"DIV", "mov ebx, $arg1$"},
+        {"JMP", "jmp $arg1$"},
         {"JMPN", "cmp eax, 0"},
         {"JMPP", "cmp eax, 0"},
         {"JMPZ", "cmp eax, 0"},
-        {"COPY", "mov %arg1%, %arg2%"},
-        {"LOAD", "mov eax, %arg1%"},
-        {"STORE", "mov %arg1%, eax"},
+        {"COPY", "mov $arg1$, $arg2$"},
+        {"LOAD", "mov eax, $arg1$"},
+        {"STORE", "mov $arg1$, eax"},
         {"INPUT", "depois man"},
         {"OUTPUT", "depois man"},
         {"INPUT_C", "depois man"},
@@ -62,8 +64,21 @@ void translate(vector<string> pre_processed)
     };
     for(int i = 0; i < pre_processed.size(); i++)
     {
-        cout << pre_processed[i] << endl;
+        translated = splitString(pre_processed[i]);   // [rot, inst, arg1], [rot, inst, arg1, arg2], [inst, arg1]
+        if(translated[0].back() == ':')
+        {
+            translated_line += translated[0] + " ";
+            translated.erase(translated.begin());  // Remove rótulo para o tratamento dos demais itens 
+        }
+        translated_line += translations[translated[0]] + "\n";
     }
+    cout << translated_line; 
+
+    /*
+        Ideia: Ter três strings que salvam as traduções, quando for section text, marca uma flag para inserir
+        na string de text, quando chegar no data a flag é setada como false e tratamos caso for const coloca na string
+        do .data e caso for space coloca na string do .bss
+    */
 }
 
 
