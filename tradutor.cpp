@@ -14,6 +14,14 @@ string ifequprocessing(string line);
 vector<string> splitString(string input);
 string removeComments(string input);
 
+enum Section{
+    DATA,
+    TEXT,
+};
+
+Section section = TEXT;
+string stext, sdata, sbss;
+
 bool jump_line = false;  // Operador booleano usado no pré-processamento de IF
 unordered_map<string, int> equ_table;
 
@@ -54,12 +62,12 @@ void translate(vector<string> pre_processed)
         {"COPY", "mov $arg1$, $arg2$"},
         {"LOAD", "mov eax, $arg1$"},
         {"STORE", "mov $arg1$, eax"},
-        {"INPUT", "depois man"},
-        {"OUTPUT", "depois man"},
-        {"INPUT_C", "depois man"},
-        {"OUTPUT_C", "depois man"},
-        {"INPUT_S", "depois man"},
-        {"OUTPUT_S", "depois man"},
+        {"INPUT", "depois man $"},
+        {"OUTPUT", "depois man $"},
+        {"INPUT_C", "depois man $"},
+        {"OUTPUT_C", "depois man $"},
+        {"INPUT_S", "depois man $"},
+        {"OUTPUT_S", "depois man $"},
         {"STOP", "syscall"}
     };
     for(int i = 0; i < pre_processed.size(); i++)
@@ -67,12 +75,59 @@ void translate(vector<string> pre_processed)
         translated = splitString(pre_processed[i]);   // [rot, inst, arg1], [rot, inst, arg1, arg2], [inst, arg1]
         if(translated[0].back() == ':')
         {
-            translated_line += translated[0] + " ";
+            if (section == DATA) translated[0].pop_back(); // Remove o : se o rotulo for de um elemento de dados
+            translated_line += translated[0]+ " ";
             translated.erase(translated.begin());  // Remove rótulo para o tratamento dos demais itens 
         }
-        translated_line += translations[translated[0]] + "\n";
+        if (translated[0] == "SECTION"){
+            if (translated[1] == "DATA") section = DATA;
+        }
+        else{
+
+            switch (section)
+                {
+                case DATA:
+                    if (translated[0] == "SPACE"){
+                        translated_line.append("resd ");
+                        if (translated.size() > 1){
+                            translated_line.append(translated[1]);
+                        }
+                        else translated_line.append("1");
+                        sbss.append(translated_line + "\n");
+                    }
+
+                    else if (translated[0] == "CONST"){
+                        translated_line.append("EQU " + translated[1]);
+                        sdata.append(translated_line + "\n");
+                    }
+                    break;
+                
+                case TEXT:
+                    translated_line.append(translations[translated[0]]);
+                    int pos = translated_line.find("$");
+
+                    if (translated.size()  == 2)  translated_line = translated_line.substr(0,pos) + translated[1];
+                    else if (translated.size()  == 3){
+                        translated_line = translated_line.substr(0,pos) + translated[1] + ", " + translated[2];
+                    }
+                    
+                    stext.append(translated_line + "\n");
+                
+                }
+
+        }
+        translated_line.clear();
     }
-    cout << translated_line; 
+
+        cout << ".data\n";
+        cout << sdata;
+
+        cout << ".bss\n";
+        cout << sbss;
+
+        cout << ".text\n";
+        cout << stext;
+
 
     /*
         Ideia: Ter três strings que salvam as traduções, quando for section text, marca uma flag para inserir
@@ -227,4 +282,3 @@ string removeComments(string input)
     }
     return result;
 }
-
