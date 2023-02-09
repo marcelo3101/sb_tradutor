@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void translate(vector<string> pre_processed);
+void translate(vector<string> pre_processed, string filename);
 vector<string> ifequ(string fname);
 string ifequprocessing(string line);
 vector<string> splitString(string input);
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        translate(ifequ(argv[1]));  // Função translate recebe o array de strings retornado pela função ifequ
+        translate(ifequ(argv[1]), argv[1]);  // Função translate recebe o array de strings retornado pela função ifequ
     }
     return 0;
 }
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 /*
     Tradução para Assembly IA-32
 */
-void translate(vector<string> pre_processed)
+void translate(vector<string> pre_processed, string filename)
 {
     cout << endl;
     cout << "Início da tradução" << endl;
@@ -71,6 +71,12 @@ void translate(vector<string> pre_processed)
         {"OUTPUT_S", "push $arg1$\npush $arg2$\ncall output_s"},
         {"STOP", "mov eax, 1\nmov ebx, 0\nint 80h"}
     };
+
+    // Parte inicial de cada section
+    sdata = "section .data\n";
+    sbss = "section .bss\n";
+    stext = "section .text\nglobal _start\nstart:\n";
+
     for(int i = 0; i < pre_processed.size(); i++)
     {
         translated = splitString(pre_processed[i]);   // [rot, inst, arg1], [rot, inst, arg1, arg2], [inst, arg1]
@@ -128,6 +134,18 @@ void translate(vector<string> pre_processed)
 
         cout << ".text\n";
         cout << stext;
+
+        cout << "Gerando arquivo final" << endl;
+        ofstream outfile(static_cast<string>(filename) + ".s");
+        // Inserir as funções escritas em assembly
+        // ...
+        
+        // Inserir traduções
+        outfile << sdata;
+        outfile << sbss;
+        outfile << stext;
+        cout << "Arquivo objeto gerado" << endl;
+        outfile.close();
 
 
     /*
@@ -232,6 +250,7 @@ vector<string> ifequ(string fname)
         }
     }
     cout << "Pré-processamento para IF e EQU realizado" << endl;
+    file.close();
     return pre_processed;
 }
 
