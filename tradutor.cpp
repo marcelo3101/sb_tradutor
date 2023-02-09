@@ -53,22 +53,23 @@ void translate(vector<string> pre_processed)
     unordered_map<string, string> translations = {
         {"ADD", "add eax, $arg1$"},
         {"SUB", "sub eax, $arg1$"},
-        {"MUL", "mov ebx, $arg1$"},
-        {"DIV", "mov ebx, $arg1$"},
+        {"MUL", "mov ebx, $arg1$\nimul ebx"},
+        {"MULT", "mov ebx, $arg1$\nimul ebx"},
+        {"DIV", "mov ebx, $arg1$\nidiv ebx"},
         {"JMP", "jmp $arg1$"},
-        {"JMPN", "cmp eax, 0"},
-        {"JMPP", "cmp eax, 0"},
-        {"JMPZ", "cmp eax, 0"},
+        {"JMPN", "cmp eax, 0\njl $arg1$"},
+        {"JMPP", "cmp eax, 0\njg $arg1$"},
+        {"JMPZ", "cmp eax, 0\nje $arg1$"},
         {"COPY", "mov $arg1$, $arg2$"},
         {"LOAD", "mov eax, $arg1$"},
         {"STORE", "mov $arg1$, eax"},
-        {"INPUT", "depois man $"},
-        {"OUTPUT", "depois man $"},
-        {"INPUT_C", "depois man $"},
-        {"OUTPUT_C", "depois man $"},
-        {"INPUT_S", "depois man $"},
-        {"OUTPUT_S", "depois man $"},
-        {"STOP", "syscall"}
+        {"INPUT", "push $arg1$\ncall input"},
+        {"OUTPUT", "push $arg1$\ncall output"},
+        {"INPUT_C", "push $arg1$\ncall input_c"},
+        {"OUTPUT_C", "push $arg1$\ncall output_c"},
+        {"INPUT_S", "push $arg1$\npush $arg2$\ncall input_s"},
+        {"OUTPUT_S", "push $arg1$\npush $arg2$\ncall output_s"},
+        {"STOP", "mov eax, 1\nmov ebx, 0\nint 80h"}
     };
     for(int i = 0; i < pre_processed.size(); i++)
     {
