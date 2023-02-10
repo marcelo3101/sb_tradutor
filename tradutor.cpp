@@ -112,7 +112,11 @@ void translate(vector<string> pre_processed, string filename)
                     }
 
                     else if (translated[0] == "CONST"){
-                        translated_line.append("EQU " + translated[1]);
+                        if (translated[1].find("'") != std::string::npos) {
+                            translated_line.append("db " + translated[1]);
+                        } else {
+                            translated_line.append("EQU " + translated[1]);
+                        }
                         sdata.append(translated_line + "\n");
                     }
                     break;
