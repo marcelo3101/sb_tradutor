@@ -76,6 +76,14 @@ void translate(vector<string> pre_processed, string filename)
     sdata = "section .data\n";
     sbss = "section .bss\n";
     stext = "section .text\nglobal _start\nstart:\n";
+    // inserir funções assembly na seção text
+    ifstream functions_file("inputs_outputs.s");  // Arquivo .asm de entrada
+    string line;
+    while (getline(functions_file, line))
+    {
+        stext.append(line);
+        stext += "\n";
+    }
 
     for(int i = 0; i < pre_processed.size(); i++)
     {
@@ -148,11 +156,7 @@ void translate(vector<string> pre_processed, string filename)
         outfile.close();
 
 
-    /*
-        Ideia: Ter três strings que salvam as traduções, quando for section text, marca uma flag para inserir
-        na string de text, quando chegar no data a flag é setada como false e tratamos caso for const coloca na string
-        do .data e caso for space coloca na string do .bss
-    */
+    
 }
 
 
