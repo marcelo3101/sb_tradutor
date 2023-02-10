@@ -3,7 +3,7 @@ msg db 'Digite a string: '
 MSG_SIZE EQU $-msg
 valor dd 10 ; Tamanho da string. Reserva de uma DWORD, então pode ter (2^32) - 1 de tamanho máximo (4294967295)
 section .bss
-string resd 1 ; Reserva uma dword para endereço do caractere ASCII
+string resb 10 ; Reserva uma dword para endereço do caractere ASCII
 
 section .text
 global _start
@@ -15,10 +15,10 @@ _start:
     int 80h
 
     push string
-    push dword [valor] ; [ESP] <-- string_size (Número inteiro, 4bytes)
+    push 10 ; [ESP] <-- string_size (Número inteiro, 4bytes)
     call input_s
     push string
-    push dword [valor]
+    push 10
     call output_s
     mov eax, 1
     mov ebx, 0
@@ -37,7 +37,7 @@ input_s:
     mov edx, [ebp+8]
     int 80h
     leave ; MOV ESP, EBP e POP EBP
-    ret 2
+    ret 8
 
 ; ---------------------------------------
 ;   Função para escrever bytes em ASCII
@@ -52,7 +52,7 @@ output_s:
     mov edx, [ebp+8]
     int 80h
     leave ; MOV ESP, EBP e POP EBP
-    ret 2
+    ret 8
 
 ; ---------------------
 ;   Comando nasm e ld
