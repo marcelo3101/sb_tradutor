@@ -1,7 +1,7 @@
 section .data
 msg db 'Digite o número decimal de até 10 dígitos: '
 MSG_SIZE EQU $-msg
-valor dd 0
+valor dd 24565432
 section .bss
 ninput resd 1 ; Reserva de uma DWORD
 buffer resb 12
@@ -15,10 +15,9 @@ _start:
     mov edx, MSG_SIZE
     int 80h
     push ninput; Empilha a label onde será salvo o input, parâmetro para a função INPUT
-    call input 
-    xor eax, eax;
-    mov eax, [ninput]
-    push buffer
+    call input
+    add dword [ninput], 2
+    push dword [ninput]
     call output
 
     mov eax, 1
@@ -75,8 +74,14 @@ no_mult:
     mov ebx, [ebp+8] ; ebx recebe o endereço da label que está salvo na pilha
     mov [ebx], eax ; Salva o número no endereço da label recebida como parâmetro
     mov eax, edi ; Retorna no eax o número de bytes lidos
+    
     leave
     ret 4  
+; -----------------------
+;   Fim da função INPUT
+; -----------------------
+
+
 
 ; -------------------------------------------------------------------
 ;   Função para converter decimal em bytes ASCII e escrever na tela
@@ -84,10 +89,11 @@ no_mult:
 ; -------------------------------------------------------------------
 
 output:
-    enter 2, 0
+    enter 14, 0
 
     ; Checar se for negativo
     mov byte [ebp-4], 0
+    mov eax, [ebp+8]
     cmp eax, 0
     jge int_to_string
     neg eax ; Transforma em positivo para a conversão
@@ -95,8 +101,7 @@ output:
 
     ;Converter novamente para ASCII
 int_to_string:
-    mov esi, buffer     ; esi aponta para o primeiro byte de buffer
-    add esi, 10          ; Vai para o último endereço do buffer
+    lea esi, [ebp-6]     ; esi aponta para o último endereço do buffer
     mov byte [esi], 0   ; Adiciona o terminator no conteúdo do último endereço
     mov ebx, 10         ; Salva 10 em ebx para realizar a divisão 
 .next_digit:
@@ -112,18 +117,16 @@ int_to_string:
     jne .done
     dec esi
     mov byte [esi], 0x2D
-    neg eax
-    sbb eax, 0
-    mov ebx, eax
 .done:
     mov eax, 4
     mov ebx, 1
-    mov ecx, buffer
+    mov ecx, esi ; esi vai apontar para o último byte adicionado, que nesse caso é o primeiro da string
     mov edx, 10
     int 80h
 
     leave
     ret 4
+
 
 
     ; nasm -f elf -o nums.o nums.s && ld -m elf_i386 -o nums nums.o
