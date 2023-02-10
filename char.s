@@ -35,7 +35,7 @@ input_c:
     mov edx, 1
     int 80h
     leave ; MOV ESP, EBP e POP EBP
-    ret 1
+    ret 4
 
 ; -----------------------------------------
 ;   Função para escrever um char em ASCII
@@ -50,7 +50,7 @@ output_c:
     mov edx, 1
     int 80h
     leave ; MOV ESP, EBP e POP EBP
-    ret 1
+    ret 4
 
 ; ---------------------
 ;   Comando nasm e ld
