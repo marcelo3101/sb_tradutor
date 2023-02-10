@@ -3,8 +3,8 @@ msg db 'Digite o número decimal de até 10 dígitos: '
 MSG_SIZE EQU $-msg
 valor dd 0
 section .bss
-input_text resd 1 ; Reserva de uma DWORD
-buffer resb 12 ; String resultado da conversão de int para ASCII
+ninput resd 1 ; Reserva de uma DWORD
+buffer resb 12
 
 section .text
 global _start
@@ -14,13 +14,12 @@ _start:
     mov ecx, msg
     mov edx, MSG_SIZE
     int 80h
-    push input_text ; Empilha a label onde será salvo o input, parâmetro para a função INPUT
+    push ninput; Empilha a label onde será salvo o input, parâmetro para a função INPUT
     call input 
-    ;push buffer
-    ;call output
-    ;add eax, 10
-    ;push dword [input_text]
-    ;call output
+    xor eax, eax;
+    mov eax, [ninput]
+    push buffer
+    call output
 
     mov eax, 1
     mov ebx, 0
@@ -39,27 +38,27 @@ input:
     ; Leitura dos bytes ASCII
     mov eax, 3
     mov ebx, 0
-    mov ecx, [ebp-6]
-    mov edx, 10
-    int 80h
+    lea ecx, [ebp-17]
+    mov edx, 12
+    int 0x80
 
     mov edi, eax ; Salva quantidade de bytes lidos
 
     ; Conversão dos bytes ASCII para um número decimal
     mov byte [ebp-4], 0
     xor eax, eax ; eax inicializado como zero
-    lea esi, [ebp-6] ; esi aponta para o endereço do primeiro byte da string lida
+    lea esi, [ebp-17] ; esi aponta para o endereço do primeiro byte da string lida
     mov ebx, 10 ; ebx igual a 10 para a multiplicação
     
     cmp byte [esi], 0x2D ; Compara se o primeiro caractere é o sinal negativo
     jne .loop ; if(*esi != '-')
     ; Caso for negativo retirar o sinal e marcar a variável local para o número ser multiplicado por -1 ao final
-    dec esi
+    inc esi
     mov byte [ebp-4], 1
 
 .loop:
     movzx ecx, byte [esi] ; ecx recebe o caractere digitado, zerando o resto dos bits
-    dec esi ; incrementa para a próxima iteração (Pilha cresce para baixo)
+    inc esi ; incrementa para a próxima iteração (Pilha cresce para baixo)
     cmp ecx, 0x30 ; Compara se é um dígito válido
     jb .done
     cmp ecx, 0x39
@@ -73,7 +72,8 @@ input:
     jne no_mult
     neg eax
 no_mult:
-    ;mov [ebp+8], eax ; Salva o número na label recebida como parâmetro
+    mov ebx, [ebp+8] ; ebx recebe o endereço da label que está salvo na pilha
+    mov [ebx], eax ; Salva o número no endereço da label recebida como parâmetro
     mov eax, edi ; Retorna no eax o número de bytes lidos
     leave
     ret 4  
@@ -84,12 +84,10 @@ no_mult:
 ; -------------------------------------------------------------------
 
 output:
-    enter 14, 0
+    enter 2, 0
 
     ; Checar se for negativo
     mov byte [ebp-4], 0
-    xor eax, eax
-    mov eax, [ebp+8]; Coloca o valor recebido como parâmetro na pilha
     cmp eax, 0
     jge int_to_string
     neg eax ; Transforma em positivo para a conversão
@@ -97,22 +95,22 @@ output:
 
     ;Converter novamente para ASCII
 int_to_string:
-    mov esi, [ebp-6]     ; esi aponta para o primeiro byte de buffer
-    sub esi, 11          ; Vai para o último endereço do buffer
+    mov esi, buffer     ; esi aponta para o primeiro byte de buffer
+    add esi, 10          ; Vai para o último endereço do buffer
     mov byte [esi], 0   ; Adiciona o terminator no conteúdo do último endereço
     mov ebx, 10         ; Salva 10 em ebx para realizar a divisão 
 .next_digit:
     xor edx, edx        ; Limpa o valor de edx para realizar a divisão de edx:eax por ebx
     div ebx             ; eax /= 10, realiza a divisão inteira. O resto estará em edx
     add dl, 0x30        ; Converte o resto da divisão para ASCII
-    inc esi             ; Estamos salvando no buffer em ordem inversa
+    dec esi             ; Estamos salvando no buffer em ordem inversa
     mov [esi], dl       ; Salva o caractere já convertido no conteúdo do endereço apontado pelo esi
     test eax, eax       ; eax AND eax para testar se foi zerado    
     jnz .next_digit     ; Repeat until eax==0
 
     cmp byte [ebp-4], 1
     jne .done
-    inc esi
+    dec esi
     mov byte [esi], 0x2D
     neg eax
     sbb eax, 0
@@ -120,7 +118,7 @@ int_to_string:
 .done:
     mov eax, 4
     mov ebx, 1
-    mov ecx, [ebp-6]
+    mov ecx, buffer
     mov edx, 10
     int 80h
 
