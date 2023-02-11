@@ -37,6 +37,7 @@ tradutor
 settings.json
 *.asm
 *.pre
+*.s
 input
 nums
 char

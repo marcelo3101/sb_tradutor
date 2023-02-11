@@ -1,30 +1,74 @@
-section .data
-msg db 'Digite o número decimal de até 10 dígitos: '
-MSG_SIZE EQU $-msg
-valor dd 24565432
-section .bss
-ninput resd 1 ; Reserva de uma DWORD
-buffer resb 12
+; ------------------------------------
+;   Função para ler um char em ASCII
+;              INPUT_C
+; ------------------------------------
 
-section .text
-global _start
-_start:
+input_c:
+    enter 0, 0 ; PUSH EBP e MOV EBP, ESP
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, [ebp+8]
+    mov edx, 1
+    int 80h
+    leave ; MOV ESP, EBP e POP EBP
+    ret 4
+; -------------------------
+;   Fim da função INPUT_C
+; -------------------------
+
+; -----------------------------------------
+;   Função para escrever um char em ASCII
+;                  OUTPUT_C
+; -----------------------------------------
+
+output_c:
+    enter 0, 0; PUSH EBP e MOV EBP, ESP
     mov eax, 4
     mov ebx, 1
-    mov ecx, msg
-    mov edx, MSG_SIZE
+    mov ecx, [ebp+8]
+    mov edx, 1
     int 80h
-    push ninput; Empilha a label onde será salvo o input, parâmetro para a função INPUT
-    call input
-    add dword [ninput], 2
-    push dword [ninput]
-    call output
+    leave ; MOV ESP, EBP e POP EBP
+    ret 4
+; --------------------------
+;   Fim da função OUTPUT_C
+; --------------------------
 
-    mov eax, 1
+; ----------------------------------
+;   Função para ler bytes em ASCII
+;              INPUT_S
+; ----------------------------------
+
+input_s:
+    enter 0, 0 ; PUSH EBP e MOV EBP, ESP
+    mov eax, 3
     mov ebx, 0
+    mov ecx, [ebp+12]
+    mov edx, [ebp+8]
     int 80h
+    leave ; MOV ESP, EBP e POP EBP
+    ret 8
+; -------------------------
+;   Fim da função INPUT_S
+; -------------------------
 
+; ---------------------------------------
+;   Função para escrever bytes em ASCII
+;                  OUTPUT_S
+; ---------------------------------------
 
+output_s:
+    enter 0, 0; PUSH EBP e MOV EBP, ESP
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, [ebp+12]
+    mov edx, [ebp+8]
+    int 80h
+    leave ; MOV ESP, EBP e POP EBP
+    ret 8
+; --------------------------
+;   Fim da função OUTPUT_S
+; --------------------------
 
 ; -----------------------------------------------------------
 ;   Função para ler bytes em ASCII e converter para decimal
@@ -126,7 +170,6 @@ int_to_string:
 
     leave
     ret 4
-
-
-
-    ; nasm -f elf -o nums.o nums.s && ld -m elf_i386 -o nums nums.o
+; ------------------------
+;   Fim da função OUTPUT
+; ------------------------

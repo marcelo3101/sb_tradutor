@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void translate(vector<string> pre_processed);
+void translate(vector<string> pre_processed, string filename);
 vector<string> ifequ(string fname);
 string ifequprocessing(string line);
 vector<string> splitString(string input);
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        translate(ifequ(argv[1]));  // Função translate recebe o array de strings retornado pela função ifequ
+        translate(ifequ(argv[1]), argv[1]);  // Função translate recebe o array de strings retornado pela função ifequ
     }
     return 0;
 }
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 /*
     Tradução para Assembly IA-32
 */
-void translate(vector<string> pre_processed)
+void translate(vector<string> pre_processed, string filename)
 {
     cout << endl;
     cout << "Início da tradução" << endl;
@@ -51,26 +51,40 @@ void translate(vector<string> pre_processed)
     vector<string> translated;
     string translated_line = "";
     unordered_map<string, string> translations = {
-        {"ADD", "add eax, $arg1$"},
-        {"SUB", "sub eax, $arg1$"},
-        {"MUL", "mov ebx, $arg1$\nimul ebx"},
-        {"MULT", "mov ebx, $arg1$\nimul ebx"},
-        {"DIV", "mov ebx, $arg1$\nidiv ebx"},
+        {"ADD", "add dword eax, [$arg1$]"},
+        {"SUB", "sub dword eax, [$arg1$]"},
+        {"MUL", "mov dword ebx, [$arg1$]\nimul ebx"},
+        {"MULT", "mov dword ebx, [$arg1$]\nimul ebx"},
+        {"DIV", "mov dword ebx, [$arg1$]\nidiv ebx"},
         {"JMP", "jmp $arg1$"},
         {"JMPN", "cmp eax, 0\njl $arg1$"},
         {"JMPP", "cmp eax, 0\njg $arg1$"},
         {"JMPZ", "cmp eax, 0\nje $arg1$"},
-        {"COPY", "mov $arg1$, $arg2$"},
-        {"LOAD", "mov eax, $arg1$"},
-        {"STORE", "mov $arg1$, eax"},
+        {"COPY", "mov dword [$arg1$], [$arg2$]"},
+        {"LOAD", "mov dword eax, [$arg1$]"},
+        {"STORE", "mov dword [$arg1$], eax"},
         {"INPUT", "push $arg1$\ncall input"},
-        {"OUTPUT", "push $arg1$\ncall output"},
+        {"OUTPUT", "push dword [$arg1$]\ncall output"},
         {"INPUT_C", "push $arg1$\ncall input_c"},
         {"OUTPUT_C", "push $arg1$\ncall output_c"},
         {"INPUT_S", "push $arg1$\npush $arg2$\ncall input_s"},
         {"OUTPUT_S", "push $arg1$\npush $arg2$\ncall output_s"},
         {"STOP", "mov eax, 1\nmov ebx, 0\nint 80h"}
     };
+
+    // Parte inicial de cada section
+    sdata = "section .data\n";
+    sbss = "section .bss\n";
+    stext = "section .text\nglobal _start\nstart:\n";
+    // inserir funções assembly na seção text
+    ifstream functions_file("inputs_outputs.s");  // Arquivo .asm de entrada
+    string line;
+    while (getline(functions_file, line))
+    {
+        stext.append(line);
+        stext += "\n";
+    }
+
     for(int i = 0; i < pre_processed.size(); i++)
     {
         translated = splitString(pre_processed[i]);   // [rot, inst, arg1], [rot, inst, arg1, arg2], [inst, arg1]
@@ -83,10 +97,10 @@ void translate(vector<string> pre_processed)
         if (translated[0] == "SECTION"){
             if (translated[1] == "DATA") section = DATA;
         }
-        else{
-
+        else
+        {
             switch (section)
-                {
+            {
                 case DATA:
                     if (translated[0] == "SPACE"){
                         translated_line.append("resd ");
@@ -98,43 +112,71 @@ void translate(vector<string> pre_processed)
                     }
 
                     else if (translated[0] == "CONST"){
-                        translated_line.append("EQU " + translated[1]);
+                        if (translated[1].find("'") != std::string::npos) {
+                            translated_line.append("db " + translated[1]);
+                        } else {
+                            translated_line.append("dd " + translated[1]);
+                        }
                         sdata.append(translated_line + "\n");
                     }
                     break;
                 
                 case TEXT:
-                    translated_line.append(translations[translated[0]]);
-                    int pos = translated_line.find("$");
-
-                    if (translated.size()  == 2)  translated_line = translated_line.substr(0,pos) + translated[1];
-                    else if (translated.size()  == 3){
-                        translated_line = translated_line.substr(0,pos) + translated[1] + ", " + translated[2];
+                    auto translation = translations.at(translated[0]);
+                    if (translated.size() == 1) {
+                        stext.append(translation);
                     }
-                    
-                    stext.append(translated_line + "\n");
-                
-                }
+                    else
+                    {
+                        std::stringstream ss(translation);
+                        std::string line;
+                        std::string result;
+
+                        int i = 1;
+                        while (std::getline(ss, line, '\n')) {
+                            auto pos = line.find("$arg1$");
+                            if (pos != std::string::npos) {
+                                line.replace(pos, 6, translated[1]);
+                            }
+
+                            pos = line.find("$arg2$");
+                            if (pos != std::string::npos && translated.size() >= 3) {
+                                line.replace(pos, 6, translated[2]);
+                            }
+
+                            result += line + '\n';
+                        }
+                        stext.append(result);
+                    }
+            }
 
         }
         translated_line.clear();
     }
 
-        cout << ".data\n";
+        /* cout << ".data\n";
         cout << sdata;
 
         cout << ".bss\n";
         cout << sbss;
 
         cout << ".text\n";
-        cout << stext;
+        cout << stext; */
+
+        cout << "Gerando arquivo final" << endl;
+        ofstream outfile(static_cast<string>(filename) + ".s");
+        // Inserir as funções escritas em assembly
+        // ...
+        
+        // Inserir traduções
+        outfile << sdata;
+        outfile << sbss;
+        outfile << stext;
+        cout << "Arquivo objeto gerado" << endl;
+        outfile.close();
 
 
-    /*
-        Ideia: Ter três strings que salvam as traduções, quando for section text, marca uma flag para inserir
-        na string de text, quando chegar no data a flag é setada como false e tratamos caso for const coloca na string
-        do .data e caso for space coloca na string do .bss
-    */
+    
 }
 
 
@@ -232,6 +274,7 @@ vector<string> ifequ(string fname)
         }
     }
     cout << "Pré-processamento para IF e EQU realizado" << endl;
+    file.close();
     return pre_processed;
 }
 

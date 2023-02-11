@@ -1,10 +1,9 @@
 section .data
 msg db 'Digite o caractere: '
 MSG_SIZE EQU $-msg
-valor dd 0
+valor db 'A'
 section .bss
-input_char resw 1 ; Reserva uma word para o char que será lido. PERGUNTAR: NÃO DEU ERRO PARA PUSH input_char CASO input_char SEJA RESB 1
-output_char resw 1; Buffer de saída
+char resb 1 ;
 
 section .text
 global _start
@@ -15,11 +14,9 @@ _start:
     mov edx, MSG_SIZE
     int 80h
 
-    push input_char
+    push char
     call input_c
-    movzx ecx, byte [input_char]
-    mov byte [output_char], cl
-    push output_char
+    push char
     call output_c
     mov eax, 1
     mov ebx, 0
@@ -38,7 +35,7 @@ input_c:
     mov edx, 1
     int 80h
     leave ; MOV ESP, EBP e POP EBP
-    ret 2
+    ret 4
 
 ; -----------------------------------------
 ;   Função para escrever um char em ASCII
@@ -53,7 +50,7 @@ output_c:
     mov edx, 1
     int 80h
     leave ; MOV ESP, EBP e POP EBP
-    ret 2
+    ret 4
 
 ; ---------------------
 ;   Comando nasm e ld
