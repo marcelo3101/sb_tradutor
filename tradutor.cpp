@@ -60,11 +60,11 @@ void translate(vector<string> pre_processed, string filename)
         {"JMPN", "cmp eax, 0\njl $arg1$"},
         {"JMPP", "cmp eax, 0\njg $arg1$"},
         {"JMPZ", "cmp eax, 0\nje $arg1$"},
-        {"COPY", "mov $arg1$, $arg2$"},
+        {"COPY", "mov dword $arg1$, $arg2$"},
         {"LOAD", "mov eax, $arg1$"},
-        {"STORE", "mov $arg1$, eax"},
+        {"STORE", "mov dword $arg1$, eax"},
         {"INPUT", "push $arg1$\ncall input"},
-        {"OUTPUT", "push $arg1$\ncall output"},
+        {"OUTPUT", "push [$arg1$]\ncall output"},
         {"INPUT_C", "push $arg1$\ncall input_c"},
         {"OUTPUT_C", "push $arg1$\ncall output_c"},
         {"INPUT_S", "push $arg1$\npush $arg2$\ncall input_s"},
@@ -97,10 +97,10 @@ void translate(vector<string> pre_processed, string filename)
         if (translated[0] == "SECTION"){
             if (translated[1] == "DATA") section = DATA;
         }
-        else{
-
+        else
+        {
             switch (section)
-                {
+            {
                 case DATA:
                     if (translated[0] == "SPACE"){
                         translated_line.append("resd ");
@@ -122,30 +122,46 @@ void translate(vector<string> pre_processed, string filename)
                     break;
                 
                 case TEXT:
-                    translated_line.append(translations[translated[0]]);
-                    int pos = translated_line.find("$");
-
-                    if (translated.size()  == 2)  translated_line = translated_line.substr(0,pos) + translated[1];
-                    else if (translated.size()  == 3){
-                        translated_line = translated_line.substr(0,pos) + translated[1] + ", " + translated[2];
+                    auto translation = translations.at(translated[0]);
+                    if (translated.size() == 1) {
+                        stext.append(translation);
                     }
-                    
-                    stext.append(translated_line + "\n");
-                
-                }
+                    else
+                    {
+                        std::stringstream ss(translation);
+                        std::string line;
+                        std::string result;
+
+                        int i = 1;
+                        while (std::getline(ss, line, '\n')) {
+                            auto pos = line.find("$arg1$");
+                            if (pos != std::string::npos) {
+                                line.replace(pos, 6, translated[1]);
+                            }
+
+                            pos = line.find("$arg2$");
+                            if (pos != std::string::npos && translated.size() >= 3) {
+                                line.replace(pos, 6, translated[2]);
+                            }
+
+                            result += line + '\n';
+                        }
+                        stext.append(result);
+                    }
+            }
 
         }
         translated_line.clear();
     }
 
-        cout << ".data\n";
+        /* cout << ".data\n";
         cout << sdata;
 
         cout << ".bss\n";
         cout << sbss;
 
         cout << ".text\n";
-        cout << stext;
+        cout << stext; */
 
         cout << "Gerando arquivo final" << endl;
         ofstream outfile(static_cast<string>(filename) + ".s");
