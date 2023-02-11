@@ -62,7 +62,7 @@ void translate(vector<string> pre_processed, string filename)
         {"JMPZ", "cmp eax, 0\nje $arg1$"},
         {"COPY", "mov dword [$arg1$], [$arg2$]"},
         {"LOAD", "mov dword eax, [$arg1$]"},
-        {"STORE", "mov dword $arg1$, eax"},
+        {"STORE", "mov dword [$arg1$], eax"},
         {"INPUT", "push $arg1$\ncall input"},
         {"OUTPUT", "push dword [$arg1$]\ncall output"},
         {"INPUT_C", "push $arg1$\ncall input_c"},
