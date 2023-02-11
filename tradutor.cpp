@@ -51,20 +51,20 @@ void translate(vector<string> pre_processed, string filename)
     vector<string> translated;
     string translated_line = "";
     unordered_map<string, string> translations = {
-        {"ADD", "add eax, $arg1$"},
-        {"SUB", "sub eax, $arg1$"},
-        {"MUL", "mov ebx, $arg1$\nimul ebx"},
-        {"MULT", "mov ebx, $arg1$\nimul ebx"},
-        {"DIV", "mov ebx, $arg1$\nidiv ebx"},
+        {"ADD", "add dword eax, [$arg1$]"},
+        {"SUB", "sub dword eax, [$arg1$]"},
+        {"MUL", "mov dword ebx, [$arg1$]\nimul ebx"},
+        {"MULT", "mov dword ebx, [$arg1$]\nimul ebx"},
+        {"DIV", "mov dword ebx, [$arg1$]\nidiv ebx"},
         {"JMP", "jmp $arg1$"},
         {"JMPN", "cmp eax, 0\njl $arg1$"},
         {"JMPP", "cmp eax, 0\njg $arg1$"},
         {"JMPZ", "cmp eax, 0\nje $arg1$"},
-        {"COPY", "mov dword $arg1$, $arg2$"},
-        {"LOAD", "mov eax, $arg1$"},
+        {"COPY", "mov dword [$arg1$], [$arg2$]"},
+        {"LOAD", "mov dword eax, [$arg1$]"},
         {"STORE", "mov dword $arg1$, eax"},
         {"INPUT", "push $arg1$\ncall input"},
-        {"OUTPUT", "push [$arg1$]\ncall output"},
+        {"OUTPUT", "push dword [$arg1$]\ncall output"},
         {"INPUT_C", "push $arg1$\ncall input_c"},
         {"OUTPUT_C", "push $arg1$\ncall output_c"},
         {"INPUT_S", "push $arg1$\npush $arg2$\ncall input_s"},
@@ -115,7 +115,7 @@ void translate(vector<string> pre_processed, string filename)
                         if (translated[1].find("'") != std::string::npos) {
                             translated_line.append("db " + translated[1]);
                         } else {
-                            translated_line.append("EQU " + translated[1]);
+                            translated_line.append("dd " + translated[1]);
                         }
                         sdata.append(translated_line + "\n");
                     }
