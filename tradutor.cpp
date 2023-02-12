@@ -69,21 +69,13 @@ void translate(vector<string> pre_processed, string filename)
         {"OUTPUT_C", "push $arg1$\ncall output_c"},
         {"INPUT_S", "push $arg1$\npush $arg2$\ncall input_s"},
         {"OUTPUT_S", "push $arg1$\npush $arg2$\ncall output_s"},
-        {"STOP", "mov eax, 1\nmov ebx, 0\nint 80h"}
+        {"STOP", "mov eax, 1\nmov ebx, 0\nint 80h\n"}
     };
 
     // Parte inicial de cada section
     sdata = "section .data\n";
     sbss = "section .bss\n";
-    stext = "section .text\nglobal _start\nstart:\n";
-    // inserir funções assembly na seção text
-    ifstream functions_file("inputs_outputs.s");  // Arquivo .asm de entrada
-    string line;
-    while (getline(functions_file, line))
-    {
-        stext.append(line);
-        stext += "\n";
-    }
+    stext = "section .text\nglobal _start\n_start:\n";
 
     for(int i = 0; i < pre_processed.size(); i++)
     {
@@ -164,8 +156,15 @@ void translate(vector<string> pre_processed, string filename)
 
         cout << "Gerando arquivo final" << endl;
         ofstream outfile(static_cast<string>(filename) + ".s");
-        // Inserir as funções escritas em assembly
-        // ...
+        
+        // inserir funções assembly na seção text
+        ifstream functions_file("inputs_outputs.s");  // Arquivo .asm de entrada
+        string line;
+        while (getline(functions_file, line))
+        {
+            stext.append(line);
+            stext += "\n";
+        }
         
         // Inserir traduções
         outfile << sdata;
