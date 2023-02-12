@@ -27,6 +27,12 @@ $ ./tradutor exemplo
 
 O programa irá gerar um arquivo com mesmo nome só que com a extensão ".s". Para este exemplo o arquivo de saída gerado vai ser "exemplo.s".
 
+### Funções escritas em assembly
+
+As funções de input e output foram escritas de antemão em assembly IA-32 NASM e estão todas no arquivo **inputs_outputs.s**. O seu conteúdo é copiado para o final da seção de texto no arquivo traduzido e assim as funções podem ser chamadas.
+
+Também existem arquivos com estrutura para testar os três tipos de input e output de forma separada. Para INPUT_C e OUTPUT_C, o arquivo char.s pode ser utilizado. Para INPUT_S e OUTPUT_S, o arquivo string.s pode ser utilizado. Para INPUT e OUTPUT, o arquivo nums.s pode ser utilizado.
+
 ## Link para o repositório
 
 https://github.com/marcelo3101/sb-tradutor
