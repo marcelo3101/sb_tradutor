@@ -128,9 +128,8 @@ void translate(vector<string> pre_processed, string filename)
                     }
                     else
                     {
-                        std::stringstream ss(translation);
-                        std::string line;
-                        std::string result;
+                        stringstream ss(translation);
+                        string line;
 
                         int i = 1;
                         while (std::getline(ss, line, '\n')) {
@@ -144,9 +143,9 @@ void translate(vector<string> pre_processed, string filename)
                                 line.replace(pos, 6, translated[2]);
                             }
 
-                            result += line + '\n';
+                            translated_line += line + '\n';
                         }
-                        stext.append(result);
+                        stext.append(translated_line);
                     }
             }
 
