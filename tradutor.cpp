@@ -127,11 +127,19 @@ void translate(vector<string> pre_processed, string filename)
                         while (std::getline(ss, line, '\n')) {
                             auto pos = line.find("$arg1$");
                             if (pos != std::string::npos) {
+                                if (translated[1].find("+") != string::npos)
+                                {
+                                    translated[1].append("*4");
+                                }
                                 line.replace(pos, 6, translated[1]);
                             }
 
                             pos = line.find("$arg2$");
                             if (pos != std::string::npos && translated.size() >= 3) {
+                                if (translated[2].find("+") != string::npos)
+                                {
+                                    translated[2].append("*4");
+                                }
                                 line.replace(pos, 6, translated[2]);
                             }
 
