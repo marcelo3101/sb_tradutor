@@ -2,7 +2,6 @@
 Repositório para o trabalho 2 da disciplina de Software Básico da UnB do semestre 2022.2
 
 ## Integrantes
-
 **Marcelo Aiache Postiglione - 180126652**
 
 **João Pedro de Sousa Soares Martins - 200020692**
@@ -13,6 +12,12 @@ Kernel: Linux 5.17.0-kali3-amd64
 
 ## Versão do C++
 **C++17**
+
+## Versão do NASM usado nos testes
+NASM version 2.15.05
+
+## Versão do LD usado nos testes
+GNU ld (GNU Binutils for Debian) 2.39
 
 ## Instruções de compilação
 ```
