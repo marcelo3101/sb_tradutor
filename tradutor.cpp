@@ -13,6 +13,7 @@ vector<string> ifequ(string fname);
 string ifequprocessing(string line);
 vector<string> splitString(string input);
 string removeComments(string input);
+vector<string> splitPreProcessed(string line);
 
 enum Section{
     DATA,
@@ -60,7 +61,7 @@ void translate(vector<string> pre_processed, string filename)
         {"JMPN", "cmp eax, 0\njl $arg1$"},
         {"JMPP", "cmp eax, 0\njg $arg1$"},
         {"JMPZ", "cmp eax, 0\nje $arg1$"},
-        {"COPY", "mov dword [$arg1$], [$arg2$]"},
+        {"COPY", "mov dword ecx, [$arg2$]\nmov dword [$arg1$], ecx"},
         {"LOAD", "mov dword eax, [$arg1$]"},
         {"STORE", "mov dword [$arg1$], eax"},
         {"INPUT", "push $arg1$\ncall input"},
@@ -79,7 +80,7 @@ void translate(vector<string> pre_processed, string filename)
 
     for(int i = 0; i < pre_processed.size(); i++)
     {
-        translated = splitString(pre_processed[i]);   // [rot, inst, arg1], [rot, inst, arg1, arg2], [inst, arg1]
+        translated = splitPreProcessed(pre_processed[i]);   // [rot, inst, arg1], [rot, inst, arg1, arg2], [inst, arg1]
         if(translated[0].back() == ':')
         {
             if (section == DATA) translated[0].pop_back(); // Remove o : se o rotulo for de um elemento de dados
@@ -116,7 +117,7 @@ void translate(vector<string> pre_processed, string filename)
                 case TEXT:
                     auto translation = translations.at(translated[0]);
                     if (translated.size() == 1) {
-                        stext.append(translation);
+                        stext.append(translated_line + translation);
                     }
                     else
                     {
@@ -178,13 +179,24 @@ void translate(vector<string> pre_processed, string filename)
         outfile << sdata;
         outfile << sbss;
         outfile << stext;
-        cout << "Arquivo objeto gerado" << endl;
+        cout << "Arquivo .s gerado" << endl;
         outfile.close();
 
 
     
 }
 
+vector<string> splitPreProcessed(string line)
+{
+    vector<string> elements;
+    stringstream ss(line);
+
+    string temp;
+    while (ss >> temp) {
+        elements.push_back(temp);
+    }
+    return elements;
+}
 
 /*
     Pré-processamento de IF e EQU
@@ -315,6 +327,8 @@ vector<string> splitString(string input)
     }
     return tokens;
 }
+
+
 
 string removeComments(string input)
 {
